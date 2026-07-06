@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0E1512">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HabitOS">
 <title>HabitOS — Sistema Operativo Personal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -242,6 +247,59 @@ h1,h2,h3{font-family:var(--font-display);}
 .small{font-size:12px;}
 .tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
 
+/* ---------- BOTTOM NAV (móvil) ---------- */
+.bottom-nav{
+  display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:rgba(14,21,18,0.92);backdrop-filter:blur(14px);
+  border-top:1px solid var(--border);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  justify-content:space-between;
+}
+.bottom-nav .tab-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 2px;border-radius:10px;font-size:9.5px;font-weight:500;border-bottom:none;
+  color:var(--muted);background:transparent;
+}
+.bottom-nav .tab-btn .bn-icon{font-size:19px;line-height:1;}
+.bottom-nav .tab-btn.active{color:var(--jade);background:var(--jade-dim);}
+
+/* ---------- MOBILE TUNING ---------- */
+@media(max-width:720px){
+  .tabs{display:none;}
+  .bottom-nav{display:flex;}
+  body{padding-bottom:calc(74px + env(safe-area-inset-bottom));}
+  .topbar-inner{padding:calc(12px + env(safe-area-inset-top)) 14px 12px;}
+  .brand-sub{display:none;}
+  .brand-text{font-size:16px;}
+  .level-chip{padding:5px 10px 5px 5px;}
+  .level-progress-track{width:46px;}
+  .xp-text{font-size:9.5px;}
+  .wrap,.view{padding-left:14px;padding-right:14px;}
+  .hero{padding:14px;gap:14px;}
+  .hero-title{font-size:20px;margin:2px 0 10px;}
+  .hero-stats{gap:14px;}
+  .hero-stat-num{font-size:19px;}
+  .hero-rings svg{width:96px;height:96px;}
+  .check-btn{width:38px;height:38px;}
+  .icon-btn{width:34px;height:34px;font-size:15px;}
+  .habit-row{padding:12px;gap:10px;}
+  .habit-name{font-size:13.5px;}
+  .grid-3{gap:8px;}
+  .stat-box{padding:10px 6px;}
+  .stat-box .num{font-size:16px;}
+  .modal-backdrop{align-items:flex-end;padding:0;}
+  .modal{max-width:100%;border-radius:18px 18px 0 0;max-height:88vh;overflow-y:auto;padding:20px 18px calc(20px + env(safe-area-inset-bottom));animation:sheetup .22s ease;}
+  @keyframes sheetup{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .field-row{grid-template-columns:1fr 1fr;}
+  .cal-cell .frac{display:none;}
+  .ach-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:380px){
+  .ach-grid{grid-template-columns:1fr;}
+  .hero-stats{gap:10px;}
+  .bottom-nav .tab-btn{font-size:8.5px;}
+}
+
 /* Responsive móvil */
 @media (max-width: 768px){
 
@@ -261,6 +319,7 @@ h1,h2,h3{font-family:var(--font-display);}
   }
 
 }
+
 
 </style>
 </head>
@@ -292,6 +351,15 @@ h1,h2,h3{font-family:var(--font-display);}
     <button class="tab-btn" data-tab="ia">Asistente IA</button>
   </div>
 </div>
+
+<nav class="bottom-nav">
+  <button class="tab-btn active" data-tab="dashboard"><span class="bn-icon"></span>Inicio</button>
+  <button class="tab-btn" data-tab="habitos"><span class="bn-icon"></span>Hábitos</button>
+  <button class="tab-btn" data-tab="estadisticas"><span class="bn-icon"></span>Stats</button>
+  <button class="tab-btn" data-tab="calendario"><span class="bn-icon"></span>Calend.</button>
+  <button class="tab-btn" data-tab="logros"><span class="bn-icon"></span>Logros</button>
+  <button class="tab-btn" data-tab="ia"><span class="bn-icon"></span>IA</button>
+</nav>
 
 <!-- DASHBOARD -->
 <div class="view active" id="view-dashboard">
@@ -790,10 +858,11 @@ function showToast(msg, xp){
 /* ============================= TABS ============================= */
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('view-'+btn.dataset.tab).classList.add('active');
+    document.getElementById('view-'+tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'instant'});
     renderAll();
   });
 });
@@ -1315,6 +1384,16 @@ const ASSIST_KB = [
   {keys:['productividad','enfoque','concentracion','concentración','procrastinar'], habits:[
     {name:'Bloque de trabajo profundo', category:'Productividad', time:'09:00', goal:{value:90,unit:'min'}, freq:'diario', xp:15}
   ], note:'Un bloque de 90 min sin interrupciones por la mañana suele rendir más que 4h fragmentadas.'},
+  {keys:['estres','estrés','relajar','relajarme','desconectar'], habits:[
+    {name:'Pausa de respiración', category:'Bienestar', time:null, goal:{value:5,unit:'min'}, freq:'diario', xp:10}
+  ], note:'5 minutos de respiración consciente varias veces al día bajan el cortisol más que una sola sesión larga.'},
+  {keys:['ansiedad','ansioso','ansiosa'], habits:[
+    {name:'Registro de pensamientos', category:'Bienestar', time:'21:00', goal:null, freq:'diario', xp:10}
+  ], note:'Escribir lo que te genera ansiedad ayuda a externalizarlo y reduce la rumiación nocturna.'},
+  {keys:['ia','inteligencia artificial','machine learning','deep learning','aprender ia'], habits:[
+    {name:'Estudio de IA', category:'Estudio', time:'20:00', goal:{value:45,unit:'min'}, freq:'diario', xp:15},
+    {name:'Proyecto práctico de IA', category:'Estudio', time:null, goal:null, freq:'semanal', xp:20}
+  ], note:'Alterna teoría (45 min diarios) con un proyecto práctico semanal — así el conocimiento se fija mucho más rápido.'},
 ];
 document.getElementById('assistBtn').addEventListener('click', runAssistant);
 document.getElementById('assistInput').addEventListener('keydown', e=>{if(e.key==='Enter') runAssistant();});
@@ -1424,6 +1503,37 @@ const GOAL_PLANS = {
     nutrition:[],
     schedule:'Revisión semanal de presupuesto los domingos + registro diario de gastos.',
     indicators:['% de ingresos ahorrado al mes','Gasto en categorías variables','Fondo de emergencia acumulado']
+  },
+  'reducir estres': {
+    habits:[
+      {name:'Pausa de respiración', category:'Bienestar', freq:'diario', time:null, goal:{value:5,unit:'min'}, xp:10},
+      {name:'Movimiento ligero', category:'Fitness', freq:'diario', time:'18:00', goal:{value:20,unit:'min'}, xp:12},
+      {name:'Límite de pantallas de noche', category:'Bienestar', freq:'diario', time:'21:30', goal:null, xp:8},
+    ],
+    nutrition:['Reduce cafeína después de las 14:00.','Evita el exceso de azúcar, que amplifica los picos de cortisol.'],
+    schedule:'2-3 pausas de respiración repartidas en el día + movimiento ligero al final de la jornada laboral.',
+    indicators:['Nivel de estrés autoevaluado (1-10) diario','Horas de sueño','Frecuencia de pausas activas']
+  },
+  'disminuir ansiedad': {
+    habits:[
+      {name:'Respiración 4-7-8', category:'Bienestar', freq:'diario', time:null, goal:{value:5,unit:'min'}, xp:10},
+      {name:'Registro de pensamientos', category:'Bienestar', freq:'diario', time:'21:00', goal:null, xp:10},
+      {name:'Ejercicio aeróbico', category:'Fitness', freq:'x_veces_semana', times:3, time:'07:00', goal:null, xp:15},
+      {name:'Límite de noticias/redes', category:'Bienestar', freq:'diario', time:null, goal:{value:30,unit:'min máx.'}, xp:8},
+    ],
+    nutrition:['Modera la cafeína: puede intensificar síntomas físicos de ansiedad.','Mantén horarios de comida regulares para estabilizar el ánimo.'],
+    schedule:'Respiración al notar activación + diario nocturno + 3 sesiones aeróbicas semanales, que son de las intervenciones con mayor evidencia para la ansiedad.',
+    indicators:['Nivel de ansiedad autoevaluado (1-10) diario','Episodios de ansiedad por semana','Horas de sueño','Minutos de ejercicio semanal']
+  },
+  'aprender ia': {
+    habits:[
+      {name:'Estudio de IA', category:'Estudio', freq:'diario', time:'20:00', goal:{value:45,unit:'min'}, xp:15},
+      {name:'Proyecto práctico de IA', category:'Estudio', freq:'semanal', time:null, goal:null, xp:20},
+      {name:'Lectura de papers/blogs de IA', category:'Estudio', freq:'x_veces_semana', times:3, time:null, goal:null, xp:10},
+    ],
+    nutrition:[],
+    schedule:'45 min diarios de teoría/cursos + 1 proyecto práctico semanal (Kaggle, side-project) + lectura técnica 3x/semana para mantenerte al día.',
+    indicators:['Horas de estudio acumuladas por semana','Proyectos o notebooks completados','Cursos/certificaciones terminados','Conceptos nuevos aplicados en práctica']
   }
 };
 const goalChipsEl = document.getElementById('goalChips');
